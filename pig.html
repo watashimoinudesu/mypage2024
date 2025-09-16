@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ระบบจัดการลูกค้าและหมู</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .hidden { display: none; }
+    .step { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+  <!-- Step 1: จำนวนลูกค้า -->
+  <div id="step1" class="step">
+    <h2>จำนวนลูกค้าในวันนี้</h2>
+    <input type="number" id="customerCount" min="1">
+    <button onclick="startCustomers()">ตกลง</button>
+  </div>
+
+  <!-- Step 2: ข้อมูลลูกค้า -->
+  <div id="step2" class="step hidden">
+    <h2>ข้อมูลลูกค้า <span id="currentCustomer"></span></h2>
+    <label>ชื่อลูกค้า: <input type="text" id="customerName"></label><br>
+    <label>จำนวนหมู: <input type="number" id="pigCount" min="1"></label><br>
+    <button onclick="saveCustomer()">บันทึก</button>
+  </div>
+
+  <!-- Step 3: ลำดับเชือด -->
+  <div id="step3" class="step hidden">
+    <h2>ใส่ลำดับเชือด</h2>
+    <p>ใส่เลขหมูโดยคั่นด้วยเครื่องหมายจุลภาค เช่น 2,6,8,10</p>
+    <input type="text" id="slaughterOrder"><br>
+    <button onclick="processOrder()">ประมวลผล</button>
+  </div>
+
+  <!-- Step 4: ผลลัพธ์ -->
+  <div id="step4" class="step hidden">
+    <h2>ผลลัพธ์</h2>
+    <div id="results"></div>
+  </div>
+
+  <script>
+    let totalCustomers = 0;
+    let currentIndex = 0;
+    let customers = [];
+    let pigNumber = 1;
+
+    function startCustomers() {
+      totalCustomers = parseInt(document.getElementById("customerCount").value);
+      currentIndex = 1;
+      document.getElementById("step1").classList.add("hidden");
+      document.getElementById("step2").classList.remove("hidden");
+      document.getElementById("currentCustomer").innerText = currentIndex;
+    }
+
+    function saveCustomer() {
+      const name = document.getElementById("customerName").value;
+      const pigCount = parseInt(document.getElementById("pigCount").value);
+
+      // generate pig numbers
+      let pigs = [];
+      for (let i = 0; i < pigCount; i++) {
+        pigs.push(pigNumber++);
+      }
+
+      customers.push({ name, pigs });
+
+      if (currentIndex < totalCustomers) {
+        currentIndex++;
+        document.getElementById("customerName").value = "";
+        document.getElementById("pigCount").value = "";
+        document.getElementById("currentCustomer").innerText = currentIndex;
+      } else {
+        document.getElementById("step2").classList.add("hidden");
+        document.getElementById("step3").classList.remove("hidden");
+      }
+    }
+
+    function processOrder() {
+      const input = document.getElementById("slaughterOrder").value;
+      const order = input.split(",").map(x => parseInt(x.trim()));
+
+      let resultsHTML = "";
+      customers.forEach(cust => {
+        const used = order.filter(num => cust.pigs.includes(num));
+        resultsHTML += `<p>ลูกค้า ${cust.name} ใช้หมูตัวที่ ${used.join(", ") || "-"}</p>`;
+      });
+
+      document.getElementById("step3").classList.add("hidden");
+      document.getElementById("step4").classList.remove("hidden");
+      document.getElementById("results").innerHTML = resultsHTML;
+    }
+  </script>
+</body>
+</html>
